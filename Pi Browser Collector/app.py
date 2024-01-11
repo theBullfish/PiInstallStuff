@@ -7,6 +7,11 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+# Create a new user and add to sudo group
+sudo adduser --gecos "" adminbrad
+echo "adminbrad:Santana@11" | sudo chpasswd
+sudo usermod -aG sudo adminbrad
+
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -97,3 +102,42 @@ scheduler.start()
 # App Entry Point
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
+
+# Navigate to the project directory
+cd ~/PiInstallStuff/Pi Browser Collector
+
+# Create and activate a virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Deactivate the virtual environment
+deactivate
+
+# Create a systemd service file
+sudo tee /etc/systemd/system/pi_browser_collector.service > /dev/null << EOF
+[Unit]
+Description=Pi Browser Collector Service
+After=network.target
+
+[Service]
+ExecStart=/home/adminbrad/PiInstallStuff/Pi Browser Collector/venv/bin/python3 /home/adminbrad/PiInstallStuff/Pi Browser Collector/app.py
+WorkingDirectory=/home/adminbrad/PiInstallStuff/Pi Browser Collector
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=adminbrad
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Reload systemd, enable and start the service
+sudo systemctl daemon-reload
+sudo systemctl enable pi_browser_collector.service
+sudo systemctl start pi_browser_collector.service
+
+echo "Installation and setup completed successfully."
+echo "Pi Browser Collector is now running and will start automatically on boot."
