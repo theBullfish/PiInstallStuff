@@ -7,10 +7,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
-# Create a new user and add to sudo group
-sudo adduser --gecos "" adminbrad
-echo "adminbrad:Santana@11" | sudo chpasswd
-sudo usermod -aG sudo adminbrad
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
