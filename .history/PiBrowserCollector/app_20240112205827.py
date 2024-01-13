@@ -7,6 +7,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
+
 # Setup Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -60,7 +61,7 @@ def collect_data():
         artist = data.get('artist')
         service = data.get('service')
         timestamp = data.get('timestamp')
-        title = data.get('title')  # Corrected this line
+        title = data.get('title')
 
         # Check if all necessary data is present
         if not all([artist, service, timestamp, title]):
@@ -88,11 +89,51 @@ def collect_data():
         logging.error(f"Error in collect_data: {e}")
         return jsonify({"status": "error"}), 500
 
+
+# Background Scheduler
 scheduler = BackgroundScheduler()
 scheduler.add_job(batch_send, 'interval', minutes=5)
 scheduler.start()
 
+# App Entry Point
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
 
+# Navigate to the project directory
+cd ~/PiInstallStuff/PiBrowserCollector
 
+# Create and activate a virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install Python dependencies
+pip install -r requirements.txt
+
+# Deactivate the virtual environment
+deactivate
+
+# Create a systemd service file
+sudo tee /etc/systemd/system/pi_browser_collector.service > /dev/null << EOF
+[Unit]
+Description=Pi Browser Collector Service
+After=network.target
+
+[Service]
+ExecStart=/home/adminbrad/PiInstallStuff/PiBrowserCollector/venv/bin/python3 /home/adminbrad/PiInstallStuff/PiBrowserCollector/app.py
+WorkingDirectory=/home/adminbrad/PiInstallStuff/PiBrowserCollector
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=adminbrad
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Reload systemd, enable and start the service
+sudo systemctl daemon-reload
+sudo systemctl enable pi_browser_collector.service
+sudo systemctl start pi_browser_collector.service
+
+echo "Installation and setup completed successfully."
+echo "Pi Browser Collector is now running and will start automatically on boot."

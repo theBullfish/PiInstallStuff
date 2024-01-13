@@ -87,12 +87,3 @@ def collect_data():
     except Exception as e:
         logging.error(f"Error in collect_data: {e}")
         return jsonify({"status": "error"}), 500
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(batch_send, 'interval', minutes=5)
-scheduler.start()
-
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
-
-
