@@ -1,5 +1,4 @@
 ﻿APScheduler==3.10.4
-libffi-dev
 Brotli==1.0.9  # Replace with the correct version number
 certifi==2022.6.15  # Replace with the correct version number
 cffi==1.15.0  # Replace with the correct version number
